@@ -31,6 +31,15 @@ Le pipeline s'articule autour des composants principaux suivants :
 +---------------+
 ```
 
+```mermaid
+flowchart LR
+    A[(MongoDB<br/>StreamVaultDB)] -->|Clients & Médias| B[producteur_commandes.py]
+    B -->|JSON / EventData| C[Azure Event Hubs<br/>Topic: commandes]
+    
+    subgraph Sécurité
+        D[.env] -.->|load_dotenv| B
+    end
+```
 
 ## 🔒 Sécurité & Résilience
 
