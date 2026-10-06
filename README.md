@@ -34,29 +34,36 @@ Le pipeline s'articule autour des composants principaux suivants :
 
 ```mermaid
 flowchart TD
-    %% Définition de l'Orchestrateur au-dessus
-    ADF["⚡ Azure Data Factory (Orchestrateur & Alerts)"]
+    %% Conteneur principal
+    subgraph Pipeline["Pipeline d'Ingestion & Traitement"]
+        
+        %% Composants
+        Mongo[("MongoDB Atlas<br/>(Referentiels)")]
+        Prod["Producteur Python"]
+        
+        ADF["⚡ Azure Data Factory<br/>(Orchestration,<br/>Ingestion Batch &<br/>Alertes Email)"]
+        EH["Azure Event Hubs"]
+        
+        ADB["Azure Databricks"]
+        ADLS[("ADLS Gen2<br/>(Bronze ➔ Silver<br/>➔ Gold)")]
 
-    %% Définition des composants principaux
-    Prod["Prod. Python"]
-    EH["Azure Event Hubs"]
-    ADB["Azure Databricks"]
-    ADLS[("ADLS Gen2")]
-    PBI["Power BI"]
-    Mongo[("MongoDB Atlas")]
-
-    %% Alignement horizontal du flux principal
-    subgraph Pipeline [" "]
-        direction LR
-        Prod --> EH --> ADB --> ADLS --> PBI
+        %% Relations internes
+        Mongo -->|2. Ingestion Batch| ADF
+        Prod -->|1. Streaming JSON| EH
+        
+        ADF -.-|Pilote Jobs & Notebooks| ADB
+        EH -->|3. Flux Continu| ADB
+        
+        ADB -->|4. Delta Lake| ADLS
     end
 
-    %% Relations d'orchestration depuis ADF
-    ADF -->|Batch| Prod
-    ADF -->|Jobs Databricks| ADB
+    %% Conteneur externe de restitution
+    subgraph Restitution["Consommation / Restitution (Hors Pipeline)"]
+        PBI["Power BI<br/>(Tableaux de bord<br/>& KPIs)"]
+    end
 
-    %% Relation de données depuis MongoDB
-    Mongo --> ADB
+    %% Lien entre le pipeline et Power BI
+    ADLS -->|5. Requêtage DirectQuery / Import| PBI
 ```
 
 ## 🔒 Sécurité & Résilience
