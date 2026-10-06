@@ -14,23 +14,6 @@ Le pipeline s'articule autour des composants principaux suivants :
 * **Stockage Analytique :** **ADLS Gen2** structuré selon le modèle Médaillon (Bronze -> Silver -> Gold) au format Delta Lake.
 * **Restitution & Analytics :** **Power BI** connecté à la couche Gold pour la visualisation des tableaux de bord.
 
-```text
-
-+-------------------------------------------------------------------+
-|          ⚡ Azure Data Factory (Orchestrateur & Alerts)           |
-+-------------------------------------------------------------------+
-        |                                       |
- (Batch)|                                       | (Jobs Databricks)
-        v                                       v
-+---------------+   +------------------+   +-------------------+   +-----------+   +----------+
-| Prod. Python  |-> | Azure Event Hubs |-> | Azure Databricks  |-> | ADLS Gen2 |-> | Power BI |
-+---------------+   +------------------+   +-------------------+   +-----------+   +----------+
-                                                     ^
-+---------------+                                    |
-| MongoDB Atlas |------------------------------------+
-+---------------+
-```
-
 
 ```mermaid
 flowchart TD
