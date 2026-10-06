@@ -31,14 +31,32 @@ Le pipeline s'articule autour des composants principaux suivants :
 +---------------+
 ```
 
+
 ```mermaid
-flowchart LR
-    A[(MongoDB<br/>StreamVaultDB)] -->|Clients & Médias| B[producteur_commandes.py]
-    B -->|JSON / EventData| C[Azure Event Hubs<br/>Topic: commandes]
-    
-    subgraph Sécurité
-        D[.env] -.->|load_dotenv| B
+flowchart TD
+    %% Définition de l'Orchestrateur au-dessus
+    ADF["⚡ Azure Data Factory (Orchestrateur & Alerts)"]
+
+    %% Définition des composants principaux
+    Prod["Prod. Python"]
+    EH["Azure Event Hubs"]
+    ADB["Azure Databricks"]
+    ADLS[("ADLS Gen2")]
+    PBI["Power BI"]
+    Mongo[("MongoDB Atlas")]
+
+    %% Alignement horizontal du flux principal
+    subgraph Pipeline [" "]
+        direction LR
+        Prod --> EH --> ADB --> ADLS --> PBI
     end
+
+    %% Relations d'orchestration depuis ADF
+    ADF -->|Batch| Prod
+    ADF -->|Jobs Databricks| ADB
+
+    %% Relation de données depuis MongoDB
+    Mongo --> ADB
 ```
 
 ## 🔒 Sécurité & Résilience
